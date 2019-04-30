@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ -f ingest.log ] ; then
+  cat ingest.log
+fi
+
+find /data/github -type f | grep -v 2015 | sort | time xargs -n 4 -P 8 ./load-events.sh | tee -a ingest.log

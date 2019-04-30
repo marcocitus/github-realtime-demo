@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+if [ -f extract.log ] ; then
+  cat extract.log
+fi
+
+while true ; do
+  ./extract-commits.sh | tee -a extract.log
+done
