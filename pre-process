@@ -2,5 +2,5 @@
 psql <<EOF
 CREATE TEMP TABLE raw (data jsonb);
 \COPY raw FROM PROGRAM 'curl -s https://data.gharchive.org/$1-$2.json.gz | gzip -d | grep -v "\\u0000"' WITH (format 'csv', quote e'\x01', delimiter e'\x02', escape e'\x01')
-\COPY (SELECT (data->'repo'->>'id')::bigint, data FROM raw) TO PROGRAM 'gzip > /data/github/$1-$2.json.gz'
+\COPY (SELECT (data->'repo'->>'id')::bigint, data FROM raw WHERE data->'repo'->>'id' IS NOT NULL) TO PROGRAM 'gzip > /data/github/$1-$2.json.gz'
 EOF
