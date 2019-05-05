@@ -6,6 +6,7 @@ tmpfile=$(mktemp)
 marker=loaded/$(basename $1)
 
 mkdir -p loaded/
+echo $* >> /tmp/files
 
 if [ -f "$marker" ] ; then
   exit 0
@@ -20,9 +21,7 @@ if [ -s $tmpfile ]; then
   size=$(gzip -l $* | tail -n 1 | awk '{printf "%d",$2}')
   psql -tAX -c "INSERT INTO ingest (events, size) VALUES ($events, $size)" >/dev/null
   timestamp=$(date +"%F %T")  
-  #timestamp=$(date +"%s")
-  rate=$(psql -tAX -c " SELECT CASE WHEN count(*) > 1 THEN pg_size_pretty((60*sum(size)/(extract(epoch from (max(ingest_time)-min(ingest_time)))))::bigint) ELSE '17 GB' END FROM (SELECT * FROM ingest WHERE ingest_time >= now() - interval '20 minutes' ORDER BY ingest_time DESC LIMIT 20) ingests")
-  eventrate=$(psql -tAX -c "SELECT sum(events) FROM (SELECT events FROM ingest WHERE ingest_time >= now() - interval '20 minutes' ORDER BY ingest_time DESC LIMIT 20) ingests")
+  rate=$(psql -tAX -c " SELECT CASE WHEN count(*) > 10 THEN pg_size_pretty((((count(*)-1.0)/count(*))*60*sum(size)/(extract(epoch from (max(ingest_time)-min(ingest_time)))))::bigint) ELSE '17 GB' END FROM (SELECT * FROM ingest WHERE ingest_time >= now() - interval '5 minutes' ORDER BY ingest_time DESC LIMIT 20) ingests")
   echo "Ingested $events GitHub events ($rate/minute)"
   touch $marker
   rm $tmpfile
