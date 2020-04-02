@@ -7,4 +7,4 @@ CREATE TABLE github_events (
 
 CREATE INDEX github_event_id ON github_events USING brin (event_id);
 
-SELECT create_distributed_table('github_events', 'repo_id');
+SELECT create_distributed_table('github_events', 'event_id');
