@@ -28,7 +28,6 @@ CREATE TABLE daily_github_commits (
     PRIMARY KEY (repo_id, day)
 );
 
-SET citus.shard_count TO 160;
 SELECT create_distributed_table('github_commits', 'repo_id', colocate_with := 'github_events');
 SELECT create_distributed_table('daily_github_commits', 'repo_id', colocate_with := 'github_events');
 
@@ -69,7 +68,7 @@ BEGIN
       FROM (
         SELECT 
           event_id,
-          repo_id,
+          (data->'repo'->>'id')::bigint repo_id,
           (data->'repo'->>'name') repo_name,
           (data->>'created_at')::timestamptz created_at,
           (data->'actor'->>'login')::text actor_login,
