@@ -1,4 +1,4 @@
 #!/bin/sh
 psql -X <<EOF
-\COPY github_events (data) FROM PROGRAM 'curl -s https://data.gharchive.org/$1-$2.json.gz | gzip -d | grep -v "\\u0000"' WITH (format 'csv', quote e'\x01', delimiter e'\x02', escape e'\x01')
+\COPY github_events (batch_hour, data) FROM PROGRAM 'curl -s https://data.gharchive.org/$1-$2.json.gz | gzip -d | grep -v "\\u0000" | sed -e "s/^/$1 $2:00:00\t/"' WITH (format 'csv', quote e'\x01', delimiter e'\t', escape e'\x01')
 EOF
